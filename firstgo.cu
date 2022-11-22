@@ -18,6 +18,8 @@ int main( )
   // Allocate Unified Memory
   cudaMallocManaged(&T, S*A*S*sizeof(float));
   cudaMallocManaged(&R, S*A*S*sizeof(float));
+
+  // Allocate Memory (Should this be unified?)
   cudaMallocManaged(&V, S*sizeof(float));
   cudaMallocManaged(&BlockMax, ceil(A/1024)*sizeof(float));
 
@@ -34,15 +36,24 @@ int main( )
   for (int d = 0; d < numDevs; d++) {
     cudaSetDevice(d);
 
-    /*** Run the Max and Sum for each state at a time. The number of total thread = number of actions.  ***/
+    /*** Run the Max and Sum for each block at a time. The number of total thread = number of actions.  ***/
     MaxSum<<<ceil(A/1024), 1024>>>(args);
+    cudaDeviceSynchronize();
+
+    /*** Use second kernel to find max of all blocks.  ***/
+    SecondReduc<<<1, ceil(A/1024)>>>(args);
+
+    /*** Save the state max. ***/
+    cudaMemcpy(V[k*numDevs + d], StateMax, int, cudaMemcpyDeviceToHost);
   }
-  // Synchronize all the GPUs
+  }
+
+  /*** Update the V matrix. ***/
+
+
+  // Synchronize all the GPUs before beginning next iteration.
+
   cudaDeviceSynchronize();
-  }
-  // TODO: Figure out how to collect all the block maxs to form the V vector.
-
-
   }
 
 }
@@ -79,6 +90,24 @@ __global__  void MaxSum(int sID,)
     }
 
     // Save the block max and then find total max somehow
-    BlockMax = sprimeSumValues[0];
+    BlockMax[blockIdx.x] = sprimeSumValues[0];
 
  }
+
+ __global__  void SecondReduc(int StateMax, float * threadmax)
+ {
+
+     int StateMax;
+
+     // Use Reduction Tree to quickly find max of all blocks
+     for (unsigned int stride = blockDim.x; stride >= 1; stride /= 2)
+     {
+       __syncthreads();
+       if (threadIdx.x < stride) {
+        BlockMax[threadIdx.x] = max(BlockMax[threadIdx.x],BlockMax[threadIdx.x + stride]);
+     }
+     }
+     // Save the state max
+     StateMax = BlockMax[0];
+
+  }
