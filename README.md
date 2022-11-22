@@ -4,3 +4,7 @@ In this project you need to parallelize applications using mutlti-GPU systems an
     What are the inputs to that model? 
     What is the model itself? 
     What is the accuracy of the model? 
+    
+Example Problem from : https://cs.brown.edu/research/pubs/pdfs/2002/Kim-2002-SFM.pdf
+
+Helpful Link: https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
