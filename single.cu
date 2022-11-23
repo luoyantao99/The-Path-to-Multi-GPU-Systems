@@ -7,14 +7,18 @@ __global__ void MaxSum();
 
 #define index(i, j, k)  ((i)*(S)*(A)) + ((j)*(S)) + (k)
 
-int main(float * T ,float * R)
+int main(float * FullT ,float * FullR, int S, int A)
 {
-  int numDevs= 0;
+  int threadperblock = 64;
 
-  unsigned int S;
-  unsigned int A;
-
+  /**** Fill V ******/
   next = (float *)calloc(S, sizeof(float));
+  for (int j = 0; j<S;j++){
+    next[j] = 0
+  }
+
+  StateT = (float *)calloc(S*A, sizeof(float));
+  StateR = (float *)calloc(S*A, sizeof(float));
 
   /*** Allocate Required Space on GPU ***/
   cudaMalloc((void **)&V, S*sizeof(float));
@@ -31,23 +35,25 @@ int main(float * T ,float * R)
   /*** Loop Through States per GPU ***/
   for (int k = 0; k < S; k++) {
 
-    /*** Find the part of the full T and R arrays that are needed for this state ***/
-    StateT
-    StateR
+    /*** Find the part of the full T and R arrays that are needed for this state. Fill new vectors ***/
+    for (int j = 0; j<S*A;j++){
+      StateT[j] = FullT[k*S*A + j]
+      StateR[j] = FullR[k*S*A + j]
+    }
 
     /*** Move all required arrays to GPU ***/
     cudaMemcpy(T, StateT, S*A*sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(R, StateR, S*A*sizeof(float), cudaMemcpyHostToDevice);
 
     /*** Run the Max and Sum for each block at a time. The number of total thread = number of actions.  ***/
-    MaxSum<<<ceil(A/1024), 1024>>>(args);
+    MaxSum<<<ceil(A/threadperblock), threadperblock>>>(k);
 
     cudaDeviceSynchronize();
     cudaFree(T);
     cudaFree(R);
 
     /*** Use second kernel to find max of all blocks.  ***/
-    SecondReduc<<<1, ceil(A/1024)>>>(args);
+    SecondReduc<<<1, ceil(A/threadperblock)>>>(args);
 
     /*** Save the state max. ***/
     cudaMemcpy(next[k], StateMax, int, cudaMemcpyDeviceToHost);
@@ -59,7 +65,7 @@ int main(float * T ,float * R)
 
 }
 
-__global__  void MaxSum(int sID,)
+__global__  void MaxSum(int sID)
 {
     // Use Shared Memory to write sums
     __shared__ float sprimeSumValues[A];
