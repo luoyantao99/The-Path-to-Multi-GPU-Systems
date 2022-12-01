@@ -46,7 +46,6 @@ int main( )
     cudaMemcpy(V[k*numDevs + d], StateMax, int, cudaMemcpyDeviceToHost);
   }
   }
-
   /*** Update the V matrix. ***/
 
 
