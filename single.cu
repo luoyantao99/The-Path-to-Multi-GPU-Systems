@@ -16,7 +16,6 @@ int main(int argc, char * argv[])
   float * StateT;
   float * StateR;
   float * BlockMaxs;
-  float * BlockMaxsCPU;
   float * StateMax;
   float * StateMaxCPU;
   float * next;
@@ -25,6 +24,14 @@ int main(int argc, char * argv[])
   float * R;
   int Sint;
   int Aint;
+
+  float sum_seq;
+  float max_a;
+  float * V_seq;
+  float * next_seq;
+
+  StateMaxCPU = (float *)calloc(1, sizeof(float));
+  StateMaxCPU[0] = 0;
 
   unsigned int S;
   unsigned int A;
@@ -44,10 +51,12 @@ int main(int argc, char * argv[])
   }
 
 
-  /**** Fill V ******/
+  /**** Fill V and V_seq ******/
   next = (float *)calloc(S, sizeof(float));
+  V_seq = (float *)calloc(S, sizeof(float));
   for (int j = 0; j<S;j++){
     next[j] = 0;
+    V_seq[j] = 0;
   }
 
   StateT = (float *)calloc(S*A, sizeof(float));
@@ -69,7 +78,6 @@ int main(int argc, char * argv[])
   /*** Loop Through States per GPU ***/
   for (int k = 0; k < S; k++) {
 
-
     /*** Find the part of the full T and R arrays that are needed for this state. Fill new vectors ***/
     for (int j = 0; j < S*A; j++) {
       StateT[j] = FullT[k*Sint*Aint + j];
@@ -83,7 +91,9 @@ int main(int argc, char * argv[])
     /*** Run the Max and Sum for each block at a time. The number of total thread = number of actions.  ***/
     MaxSum<<<ceil(A/threadperblock), threadperblock>>>(BlockMaxs,V,R,T,k,A,S);
     cudaDeviceSynchronize();
+
     /*** Use second kernel to find max of all blocks.  ***/
+
     SecondReduc<<<1, ceil(A/threadperblock)/2>>>(StateMax,BlockMaxs);
     cudaDeviceSynchronize();
 
@@ -94,6 +104,37 @@ int main(int argc, char * argv[])
   // Synchronize all the GPUs before beginning next iteration.
   cudaDeviceSynchronize();
   }
+
+
+  next_seq = (float *)calloc(S, sizeof(float));
+  /*** Do sequential. ***/
+  for (int i = 0; i < numiters; i++) {
+    printf("i = %u\n", i);
+    for (int s = 0; s < S; s++) {
+      max_a = 0;
+      for (int a = 0; a < A; a++) {
+        sum_seq = 0;
+        for (int sp = 0; sp < S; sp++) {
+          sum_seq = sum_seq + FullT[s*S*A + a*S + sp]*(FullR[s*S*A + a*S + sp] + V_seq[sp]);
+        }
+        if (sum_seq > max_a){
+          max_a = sum_seq;
+        }
+      }
+      next_seq[s] = max_a;
+    }
+    for (int s = 0; s < S; s++) {
+        V_seq[s] = next_seq[s];
+    }
+  }
+
+for (int s = 0; s < S; s++) {
+  if (V_seq[s] != next[s]){
+    printf("FAIL\n");
+    printf("seq = %lf\n", V_seq[s]);
+    printf("GPU = %lf\n", next[s]);
+  }
+}
 
 }
 
