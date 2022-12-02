@@ -16,7 +16,7 @@ int main(int argc, char * argv[])
     exit(1);
   }
 
-  int threadperblock = 64;
+  int threadperblock = 128;
   float * FullT;
   float * FullR;
   float * StateT;
@@ -147,14 +147,14 @@ int main(int argc, char * argv[])
      }
   }
 
-
+  printf("GPU version passed correctness test\n");
 
 }
 
 __global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,int A,int S)
 {
     // Use Shared Memory to write sums
-    __shared__ float sprimeSumValues[64];
+    __shared__ float sprimeSumValues[128];
     float sprimeSum;
     int aID;
     sprimeSum = 0;

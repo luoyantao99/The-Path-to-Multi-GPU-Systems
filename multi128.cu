@@ -15,7 +15,7 @@ int main(int argc, char * argv[])
     exit(1);
   }
 
-  int threadperblock = 64;
+  int threadperblock = 128;
   float * FullT;
   float * FullR;
   float * BlockMaxArrays;
@@ -54,7 +54,6 @@ int main(int argc, char * argv[])
 
   /**** Loop Through Iterations ******/
   for (int i = 0; i < numiters; i++) {
-    printf("i = %u\n", i);
 
   /*** Loop Through States per GPU ***/
   for (int k = 0; k < S/numDevs; k++) {
@@ -120,7 +119,7 @@ int main(int argc, char * argv[])
 __global__  void MaxSum(float *BlockMaxArrays,float * V, float * FullR,float * FullT,int sID,int A,int S)
 {
     // Use Shared Memory to write sums
-    __shared__ float sprimeSumValues[64];
+    __shared__ float sprimeSumValues[128];
     float sprimeSum;
     int aID;
     sprimeSum = 0;
