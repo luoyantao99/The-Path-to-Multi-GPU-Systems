@@ -191,7 +191,7 @@ int main(int argc, char * argv[])
       printf("GPU version failed correctness test\n");
     }
   }
-
+  
   printf("GPU version passed correctness test\n");
 
   cudaFree(V);
