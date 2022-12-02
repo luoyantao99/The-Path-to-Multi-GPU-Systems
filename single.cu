@@ -80,37 +80,37 @@ int main(int argc, char * argv[])
 
   /**** Loop Through Iterations ******/
   for (int i = 0; i < numiters; i++) {
-    printf("i = %u\n", i);
-  /*** Move next to V ***/
-  cudaMemcpy(V, next, S*sizeof(float), cudaMemcpyHostToDevice);
+    // printf("i = %u\n", i);
+    /*** Move next to V ***/
+    cudaMemcpy(V, next, S*sizeof(float), cudaMemcpyHostToDevice);
 
-  /*** Loop Through States per GPU ***/
-  for (int k = 0; k < S; k++) {
+    /*** Loop Through States per GPU ***/
+    for (int k = 0; k < S; k++) {
 
-    /*** Find the part of the full T and R arrays that are needed for this state. Fill new vectors ***/
-    for (int j = 0; j < S*A; j++) {
-      StateT[j] = FullT[k*Sint*Aint + j];
-      StateR[j] = FullR[k*S*A + j];
-    }
+      /*** Find the part of the full T and R arrays that are needed for this state. Fill new vectors ***/
+      for (int j = 0; j < S*A; j++) {
+        StateT[j] = FullT[k*Sint*Aint + j];
+        StateR[j] = FullR[k*S*A + j];
+      }
 
-    /*** Move all required arrays to GPU ***/
-    cudaMemcpy(T, StateT, S*A*sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(R, StateR, S*A*sizeof(float), cudaMemcpyHostToDevice);
+      /*** Move all required arrays to GPU ***/
+      cudaMemcpy(T, StateT, S*A*sizeof(float), cudaMemcpyHostToDevice);
+      cudaMemcpy(R, StateR, S*A*sizeof(float), cudaMemcpyHostToDevice);
 
-    /*** Run the Max and Sum for each block at a time. The number of total thread = number of actions.  ***/
-    MaxSum<<<ceil(A/threadperblock), threadperblock>>>(BlockMaxs,V,R,T,k,A,S);
-    cudaDeviceSynchronize();
+      /*** Run the Max and Sum for each block at a time. The number of total thread = number of actions.  ***/
+      MaxSum<<<ceil(A/threadperblock), threadperblock>>>(BlockMaxs,V,R,T,k,A,S);
+      cudaDeviceSynchronize();
 
     /*** Use second kernel to find max of all blocks.  ***/
     SecondReduc<<<1, ceil(A/threadperblock)/2>>>(StateMax,BlockMaxs);
     cudaDeviceSynchronize();
 
-    /*** Save the state max. ***/
-    cudaMemcpy(StateMaxCPU, StateMax, 1*sizeof(float), cudaMemcpyDeviceToHost);
-    next[k] = StateMaxCPU[0];
-  }
-  // Synchronize all the GPUs before beginning next iteration.
-  cudaDeviceSynchronize();
+      /*** Save the state max. ***/
+      cudaMemcpy(StateMaxCPU, StateMax, 1*sizeof(float), cudaMemcpyDeviceToHost);
+      next[k] = StateMaxCPU[0];
+    }
+    // Synchronize all the GPUs before beginning next iteration.
+    cudaDeviceSynchronize();
   }
 
   clock_t end = clock();  
@@ -121,7 +121,7 @@ int main(int argc, char * argv[])
   next_seq = (float *)calloc(S, sizeof(float));
   /*** Do sequential. ***/
   for (int i = 0; i < numiters; i++) {
-    printf("i = %u\n", i);
+    // printf("i = %u\n", i);
     for (int s = 0; s < S; s++) {
       max_a = 0;
       for (int a = 0; a < A; a++) {
@@ -203,3 +203,8 @@ __global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,
       StateMax[0] = BlockMaxs[0];
     }
   }
+
+
+
+// compile with: nvcc -o singlegpu single.cu
+// ./singlegpu 10 10 500
