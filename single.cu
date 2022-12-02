@@ -31,6 +31,7 @@ int main(int argc, char * argv[])
   int Sint;
   int Aint;
 
+  //Sequential stuff
   float sum_seq;
   float max_a;
   float * V_seq;
@@ -46,6 +47,7 @@ int main(int argc, char * argv[])
   numiters = atoi(argv[3]);
   A =  (unsigned int) atoi(argv[1]);
   S =  (unsigned int) atoi(argv[2]);
+
 
   /**** Fill T and R ******/
   FullT = (float *)calloc(S*A*S, sizeof(float));
@@ -68,15 +70,14 @@ int main(int argc, char * argv[])
   StateT = (float *)calloc(S*A, sizeof(float));
   StateR = (float *)calloc(S*A, sizeof(float));
 
+  clock_t start = clock();
+
   /*** Allocate Required Space on GPU ***/
   cudaMalloc((void **)&V, S*sizeof(float));
   cudaMalloc((void **)&T, S*A*sizeof(float));
   cudaMalloc((void **)&R, S*A*sizeof(float));
   cudaMalloc((void **)&BlockMaxs, ceil(A/threadperblock)*sizeof(float));
   cudaMalloc((void **)&StateMax, 1*sizeof(float));
-
-
-  clock_t start = clock();
 
   /**** Loop Through Iterations ******/
   for (int i = 0; i < numiters; i++) {
@@ -136,16 +137,9 @@ int main(int argc, char * argv[])
       next_seq[s] = max_a;
     }
     for (int s = 0; s < S; s++) {
-        V_seq[s] = next_seq[s];
-    }
-  }
-
-  for (int s = 0; s < S; s++) {
-    if (V_seq[s] != next[s]){
-      printf("FAIL\n");
-      printf("seq = %lf\n", V_seq[s]);
-      printf("GPU = %lf\n", next[s]);
-      exit(1);
+      if (V_seq[s] != next[s]){
+       printf("FAIL\n");
+     }
     }
   }
 

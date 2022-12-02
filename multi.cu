@@ -8,6 +8,13 @@ __global__ void SecondReduc(float *,float *);
 
 int main(int argc, char * argv[])
 {
+
+  if (argc != 4)
+  {
+    printf("Not enough arguments");
+    exit(1);
+  }
+
   int threadperblock = 64;
   float * FullT;
   float * FullR;
@@ -22,6 +29,8 @@ int main(int argc, char * argv[])
   numiters = atoi(argv[3]);
   A =  (unsigned int) atoi(argv[1]);
   S =  (unsigned int) atoi(argv[2]);
+
+  clock_t start = clock();
 
   /**** Fill T and R ******/
   // Allocate Unified Memory
@@ -72,6 +81,34 @@ int main(int argc, char * argv[])
   for (int d = 0; d < numDevs; d++) {
     cudaSetDevice(d);
     cudaDeviceSynchronize();
+  }
+
+  clock_t end = clock();
+  double time_taken = ((double)(end - start))/ CLOCKS_PER_SEC;
+  printf("Time taken = %lf\n", time_taken);
+
+  next_seq = (float *)calloc(S, sizeof(float));
+  /*** Do sequential. ***/
+  for (int i = 0; i < numiters; i++) {
+    // printf("i = %u\n", i);
+    for (int s = 0; s < S; s++) {
+      max_a = 0;
+      for (int a = 0; a < A; a++) {
+        sum_seq = 0;
+        for (int sp = 0; sp < S; sp++) {
+          sum_seq = sum_seq + FullT[s*S*A + a*S + sp]*(FullR[s*S*A + a*S + sp] + V_seq[sp]);
+        }
+        if (sum_seq > max_a){
+          max_a = sum_seq;
+        }
+      }
+      next_seq[s] = max_a;
+    }
+    for (int s = 0; s < S; s++) {
+      if (V_seq[s] != next[s]){
+       printf("FAIL\n");
+     }
+    }
   }
 
 }
