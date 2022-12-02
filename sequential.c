@@ -83,13 +83,5 @@ int main(int argc, char * argv[])
     double time_taken = ((double)(end - start))/ CLOCKS_PER_SEC;
     printf("Time taken = %lf\n", time_taken);
 
-//   for (int s = 0; s < S; s++) {
-//     if (V_seq[s] != next[s]){
-//       printf("FAIL\n");
-//       printf("seq = %lf\n", V_seq[s]);
-//       printf("GPU = %lf\n", next[s]);
-//     }
-//   }
-
 }
 
