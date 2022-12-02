@@ -78,41 +78,34 @@ __global__ void SecondReduc(float *,float *);
 
 int main(int argc, char * argv[])
 {
-  // if (argc != 4)
-  // {
-  //   printf("Not enough arguments");
-  //   exit(1);
-  // }
+  struct arguments user_input;
 
+	/* Default values. */
+	user_input.A_size = 1024;
+	user_input.S_size = 10;
+	user_input.iter = 1;
 
+	/* Parse our arguments; every option seen by parse_opt will
+		 be reflected in arguments. */
+	argp_parse (&argp, argc, argv, 0, 0, &user_input);
 
-
-
-  // struct arguments user_input;
-
-	// /* Default values. */
-	// user_input.A_size = 1024;
-	// user_input.S_size = 10;
-	// user_input.iter = 1;
-
-	// /* Parse our arguments; every option seen by parse_opt will
-	// 	 be reflected in arguments. */
-	// argp_parse (&argp, argc, argv, 0, 0, &user_input);
-
-	// printf ("A_size = %d\n S_size = %d\n iter = %d\n",
-	// 		user_input.A_size,
-	// 		user_input.S_size,
-	// 		user_input.iter);
+	printf ("Action space size = %d\nState space size = %d\nNumber of iterations = %d\n",
+		user_input.A_size,
+		user_input.S_size,
+		user_input.iter);
 
   
-  // unsigned int S;
-  // unsigned int A;
-  // int numiters = 0;
+  unsigned int S;
+  unsigned int A;
+  int numiters = 0;
 
-  // numiters = user_input.iter;
-  // A =  (unsigned int) user_input.A_size;
-  // S =  (unsigned int) user_input.S_size;
+  numiters = user_input.iter;
+  A =  (unsigned int) user_input.A_size;
+  S =  (unsigned int) user_input.S_size;
 
+  printf("%d", numiters);
+  printf("%u", A);
+  printf("%u", S);
 
   int threadperblock = 64;
   float * FullT;
@@ -138,13 +131,13 @@ int main(int argc, char * argv[])
   StateMaxCPU = (float *)calloc(1, sizeof(float));
   StateMaxCPU[0] = 0;
 
-  unsigned int S;
-  unsigned int A;
-  int numiters = 0;
+  // unsigned int S;
+  // unsigned int A;
+  // int numiters = 0;
 
-  numiters = atoi(argv[3]);
-  A =  (unsigned int) atoi(argv[1]);
-  S =  (unsigned int) atoi(argv[2]);
+  // numiters = atoi(argv[3]);
+  // A =  (unsigned int) atoi(argv[1]);
+  // S =  (unsigned int) atoi(argv[2]);
 
 
   /**** Fill T and R ******/
@@ -236,16 +229,14 @@ int main(int argc, char * argv[])
     }
     for (int s = 0; s < S; s++) {
       if (V_seq[s] != next[s]){
-        printf("FAIL\n");
-        exit(1)
+        printf("GPU version failed correctness test\n");
+        exit(1);
       }
     }
-    for (int s = 0; s < S; s++) {
-      if (V_seq[s] != next[s]) {
-      printf("GPU version failed correctness test\n");
-      }
-     }
   }
+
+  printf("GPU version passed correctness test\n");
+
 }
 
 
