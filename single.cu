@@ -10,6 +10,12 @@ __global__ void SecondReduc(float *,float *);
 
 int main(int argc, char * argv[])
 {
+  if (argc != 4)
+  {
+    printf("Not enough arguments");
+    exit(1);
+  }
+  
   int threadperblock = 64;
   float * FullT;
   float * FullR;
@@ -69,6 +75,9 @@ int main(int argc, char * argv[])
   cudaMalloc((void **)&BlockMaxs, ceil(A/threadperblock)*sizeof(float));
   cudaMalloc((void **)&StateMax, 1*sizeof(float));
 
+
+  clock_t start = clock();
+
   /**** Loop Through Iterations ******/
   for (int i = 0; i < numiters; i++) {
     printf("i = %u\n", i);
@@ -105,6 +114,10 @@ int main(int argc, char * argv[])
   cudaDeviceSynchronize();
   }
 
+  clock_t end = clock();  
+  double time_taken = ((double)(end - start))/ CLOCKS_PER_SEC;
+  printf("Time taken = %lf\n", time_taken);
+
 
   next_seq = (float *)calloc(S, sizeof(float));
   /*** Do sequential. ***/
@@ -128,13 +141,16 @@ int main(int argc, char * argv[])
     }
   }
 
-for (int s = 0; s < S; s++) {
-  if (V_seq[s] != next[s]){
-    printf("FAIL\n");
-    printf("seq = %lf\n", V_seq[s]);
-    printf("GPU = %lf\n", next[s]);
+  for (int s = 0; s < S; s++) {
+    if (V_seq[s] != next[s]){
+      printf("FAIL\n");
+      printf("seq = %lf\n", V_seq[s]);
+      printf("GPU = %lf\n", next[s]);
+      exit(1);
+    }
   }
-}
+
+  printf("GPU version passed correctness test");
 
 }
 
