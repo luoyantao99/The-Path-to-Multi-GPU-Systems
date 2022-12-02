@@ -30,19 +30,15 @@ int main(int argc, char * argv[])
   cudaMallocManaged(&V, S*sizeof(float));
   cudaMallocManaged(&BlockMaxArrays, S*ceil(A/threadperblock)*sizeof(float));
 
-  printf("i = \n");
-
   for (int tr = 0; tr<S*A*S;tr++){
     FullT[tr] = 1;
     FullR[tr] = 1;
   }
-  printf("i = \n");
 
   /**** Fill next ******/
   for (int j = 0; j<S;j++){
     V[j] = 0;
   }
-  printf("i = \n");
 
   // Find number of GPUs
   cudaGetDeviceCount(&numDevs);
@@ -65,17 +61,17 @@ int main(int argc, char * argv[])
   }
 
   for (int d = 0; d < numDevs; d++) {
+    cudaSetDevice(d);
     cudaDeviceSynchronize();
   }
 
   /*** Use second kernel to find max of all blocks.  ***/
   SecondReduc<<< S , ceil(A/threadperblock)/2>>>(V,BlockMaxArrays);
-  cudaDeviceSynchronize();
   }
 
-  for (int k = 0; k < S; k++) {
-      printf("k = %u\n", k);
-      printf("V = %lf\n", V[k]);
+  for (int d = 0; d < numDevs; d++) {
+    cudaSetDevice(d);
+    cudaDeviceSynchronize();
   }
 
 }

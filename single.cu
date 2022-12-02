@@ -101,9 +101,9 @@ int main(int argc, char * argv[])
       MaxSum<<<ceil(A/threadperblock), threadperblock>>>(BlockMaxs,V,R,T,k,A,S);
       cudaDeviceSynchronize();
 
-    /*** Use second kernel to find max of all blocks.  ***/
-    SecondReduc<<<1, ceil(A/threadperblock)/2>>>(StateMax,BlockMaxs);
-    cudaDeviceSynchronize();
+      /*** Use second kernel to find max of all blocks.  ***/
+      SecondReduc<<<1, ceil(A/threadperblock)/2>>>(StateMax,BlockMaxs);
+      cudaDeviceSynchronize();
 
       /*** Save the state max. ***/
       cudaMemcpy(StateMaxCPU, StateMax, 1*sizeof(float), cudaMemcpyDeviceToHost);
