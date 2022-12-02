@@ -266,4 +266,4 @@ __global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,
 
 
 // compile with: nvcc -o singlegpu single.cu
-// ./singlegpu 10 10 500
+// ./singlegpu -A 1024 -S 100 -i 50
