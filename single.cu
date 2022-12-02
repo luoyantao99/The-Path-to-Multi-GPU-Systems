@@ -230,15 +230,16 @@ int main(int argc, char * argv[])
 		for (int s = 0; s < S; s++) {
 		      V_seq[s] = next_seq[s];
 		     }
+	}
 
-			}
+	for (int s = 0; s < S; s++) {
+	  if (V_seq[s] != next[s]) {
+	    printf("GPU version failed correctness test\n");
+	  }
+	}
 
-	    for (int s = 0; s < S; s++) {
-	      if (V_seq[s] != next[s]) {
-	      printf("GPU version failed correctness test\n");
-	      }
-	     }
-		  }
+
+}
 
 
 __global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,int A,int S)
