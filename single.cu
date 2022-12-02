@@ -102,7 +102,6 @@ int main(int argc, char * argv[])
     cudaDeviceSynchronize();
 
     /*** Use second kernel to find max of all blocks.  ***/
-
     SecondReduc<<<1, ceil(A/threadperblock)/2>>>(StateMax,BlockMaxs);
     cudaDeviceSynchronize();
 
