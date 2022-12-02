@@ -73,6 +73,11 @@ int main(int argc, char * argv[])
   cudaDeviceSynchronize();
   }
 
+  for (int k = 0; k < S; k++) {
+      printf("k = %u\n", k);
+      printf("V = %lf\n", V[k]);
+  }
+
 }
 
 __global__  void MaxSum(float *BlockMaxArrays,float * V, float * FullR,float * FullT,int sID,int A,int S)
