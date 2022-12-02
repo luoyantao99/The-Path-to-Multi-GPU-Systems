@@ -26,10 +26,22 @@ int main(int argc, char * argv[])
   unsigned int A;
   int numiters = 0;
 
+  //Sequential stuff
+  float sum_seq;
+  float max_a;
+  float * V_seq;
+  float * next_seq;
+
   numiters = atoi(argv[3]);
   A =  (unsigned int) atoi(argv[1]);
   S =  (unsigned int) atoi(argv[2]);
 
+  next_seq = (float *)calloc(S, sizeof(float));
+  V_seq = (float *)calloc(S, sizeof(float));
+  for (int j = 0; j<S;j++){
+    next_seq[j] = 0;
+    V_seq[j] = 0;
+  }
   clock_t start = clock();
 
   /**** Fill T and R ******/
@@ -44,17 +56,14 @@ int main(int argc, char * argv[])
     FullR[tr] = 1;
   }
 
-  /**** Fill next ******/
   for (int j = 0; j<S;j++){
     V[j] = 0;
   }
 
   // Find number of GPUs
   cudaGetDeviceCount(&numDevs);
-
   /**** Loop Through Iterations ******/
   for (int i = 0; i < numiters; i++) {
-    printf("i = %u\n", i);
 
   /*** Loop Through States per GPU ***/
   for (int k = 0; k < S/numDevs; k++) {
@@ -76,12 +85,13 @@ int main(int argc, char * argv[])
 
   /*** Use second kernel to find max of all blocks.  ***/
   SecondReduc<<< S , ceil(A/threadperblock)/2>>>(V,BlockMaxArrays);
-  }
+
 
   for (int d = 0; d < numDevs; d++) {
     cudaSetDevice(d);
     cudaDeviceSynchronize();
   }
+}
 
   clock_t end = clock();
   double time_taken = ((double)(end - start))/ CLOCKS_PER_SEC;
@@ -105,7 +115,7 @@ int main(int argc, char * argv[])
       next_seq[s] = max_a;
     }
     for (int s = 0; s < S; s++) {
-      V_seq[s] = next_seq[s]
+      V_seq[s] = next_seq[s];
      }
     }
     for (int s = 0; s < S; s++) {
@@ -115,7 +125,6 @@ int main(int argc, char * argv[])
      }
   }
 
-}
 
 __global__  void MaxSum(float *BlockMaxArrays,float * V, float * FullR,float * FullT,int sID,int A,int S)
 {

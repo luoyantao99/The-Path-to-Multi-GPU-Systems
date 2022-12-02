@@ -26,9 +26,23 @@ int main(int argc, char * argv[])
   unsigned int A;
   int numiters = 0;
 
+  //Sequential stuff
+  float sum_seq;
+  float max_a;
+  float * V_seq;
+  float * next_seq;
+
   numiters = atoi(argv[3]);
   A =  (unsigned int) atoi(argv[1]);
   S =  (unsigned int) atoi(argv[2]);
+
+  next_seq = (float *)calloc(S, sizeof(float));
+  V_seq = (float *)calloc(S, sizeof(float));
+
+  for (int j = 0; j<S;j++){
+    next_seq[j] = 0;
+    V_seq[j] = 0;
+  }
 
   clock_t start = clock();
 
@@ -44,7 +58,6 @@ int main(int argc, char * argv[])
     FullR[tr] = 1;
   }
 
-  /**** Fill next ******/
   for (int j = 0; j<S;j++){
     V[j] = 0;
   }
@@ -75,11 +88,12 @@ int main(int argc, char * argv[])
 
   /*** Use second kernel to find max of all blocks.  ***/
   SecondReduc<<< S , ceil(A/threadperblock)/2>>>(V,BlockMaxArrays);
-  }
+
 
   for (int d = 0; d < numDevs; d++) {
     cudaSetDevice(d);
     cudaDeviceSynchronize();
+  }
   }
 
   clock_t end = clock();
@@ -104,17 +118,20 @@ int main(int argc, char * argv[])
       next_seq[s] = max_a;
     }
     for (int s = 0; s < S; s++) {
-      V_seq[s] = next_seq[s]
+      V_seq[s] = next_seq[s];
      }
     }
+
     for (int s = 0; s < S; s++) {
       if (V_seq[s] != V[s]) {
       printf("GPU version failed correctness test\n");
+      printf("Failed State: %lf\n",s);
+      printf("Failed State Value Seq: %lf\n",V_seq[s]);
+      printf("Failed State Value GPU: %lf\n",V[s]);
       }
      }
   }
 
-}
 
 __global__  void MaxSum(float *BlockMaxArrays,float * V, float * FullR,float * FullT,int sID,int A,int S)
 {

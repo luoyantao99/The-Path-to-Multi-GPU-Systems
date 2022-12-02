@@ -137,7 +137,7 @@ int main(int argc, char * argv[])
       next_seq[s] = max_a;
     }
     for (int s = 0; s < S; s++) {
-      V_seq[s] = next_seq[s]
+      V_seq[s] = next_seq[s];
      }
     }
     for (int s = 0; s < S; s++) {
@@ -147,9 +147,6 @@ int main(int argc, char * argv[])
      }
   }
 
-
-
-}
 
 __global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,int A,int S)
 {
