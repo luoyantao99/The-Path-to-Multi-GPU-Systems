@@ -10,10 +10,9 @@ int main(int argc, char * argv[])
     if (argc != 4)
     {
         printf("Not enough arguments");
-        return -1;
+        exit(1);
     }
 
-    int threadperblock = 64;
     float * FullT;
     float * FullR;
     float * StateT;
