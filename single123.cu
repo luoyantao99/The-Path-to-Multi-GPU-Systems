@@ -2,110 +2,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <argp.h>
-
-
-
-/* Program documentation. */
-static char doc[] = "Demo";
-
-/* A description of the arguments we accept. */
-static char args_doc[] = "input.txt output.txt";
-
-/* The options we understand. */
-static struct argp_option options[] = {
-	{"A_size",        'A',     "A_size",         0,  "A_size(default: \"localhost\")" },
-	{"S_size",	      'S',     "S_size",			   0,  "S_size(default: 5432)" },
-	{"num_iteration", 'i',  "num_iteration",	 0,  "num_iteration(default: \"postgres\")" },
-	{ 0 }
-};
-
-/* Used by main to communicate with parse_opt. */
-struct arguments
-{
-	char* args[0];
-	int A_size, S_size, iter;
-};
-
-/* Parse a single option. */
-static error_t parse_opt (int key, char* arg, struct argp_state* state)
-{
-	/* Get the input argument from argp_parse, which we know is a pointer to our arguments structure. */
-	// struct arguments* arguments = state->input;
-  struct arguments *arguments =  static_cast<struct arguments*>(state->input);
-
-	switch (key)
-	{
-		case 'A':
-			arguments->A_size = atoi(arg);
-			break;
-		case 'S':
-			arguments->S_size = atoi(arg);
-			break;
-		case 'i':
-			arguments->iter = atoi(arg);
-			break;
-
-		// case ARGP_KEY_ARG:
-		// 	if (state->arg_num >= 2)
-		// 		/* Too many arguments. */
-		// 		argp_usage (state);
-		// 	arguments->args[state->arg_num] = arg;
-		// 	break;
-		// case ARGP_KEY_END:
-		// 	if (state->arg_num < 2)
-		// 		/* Not enough arguments. */
-		// 		argp_usage (state);
-		// 	break;
-		default:
-			return ARGP_ERR_UNKNOWN;
-	}
-	return 0;
-}
-
-/* Our argp parser. */
-static struct argp argp = { options, parse_opt, args_doc, doc };
-
-
-
-
 
 __global__ void MaxSum(float *,float *,float *,float *,int,int,int);
 __global__ void SecondReduc(float *,float *);
 
 #define index(i, j, k)  ((i)*(S)*(A)) + ((j)*(S)) + (k)
 
-
 int main(int argc, char * argv[])
 {
-  struct arguments user_input;
-
-	/* Default values. */
-	user_input.A_size = 1024;
-	user_input.S_size = 10;
-	user_input.iter = 1;
-
-	/* Parse our arguments; every option seen by parse_opt will
-		 be reflected in arguments. */
-	argp_parse (&argp, argc, argv, 0, 0, &user_input);
-
-	printf ("Action space size = %d\nState space size = %d\nNumber of iterations = %d\n",
-		user_input.A_size,
-		user_input.S_size,
-		user_input.iter);
-
-
-  unsigned int S;
-  unsigned int A;
-  int numiters = 0;
-
-  numiters = user_input.iter;
-  A =  (unsigned int) user_input.A_size;
-  S =  (unsigned int) user_input.S_size;
-
-  printf("%d", numiters);
-  printf("%u", A);
-  printf("%u", S);
+  if (argc != 4)
+  {
+    printf("Not enough arguments");
+    exit(1);
+  }
 
   int threadperblock = 64;
   float * FullT;
@@ -131,13 +40,13 @@ int main(int argc, char * argv[])
   StateMaxCPU = (float *)calloc(1, sizeof(float));
   StateMaxCPU[0] = 0;
 
-  // unsigned int S;
-  // unsigned int A;
-  // int numiters = 0;
+  unsigned int S;
+  unsigned int A;
+  int numiters = 0;
 
-  // numiters = atoi(argv[3]);
-  // A =  (unsigned int) atoi(argv[1]);
-  // S =  (unsigned int) atoi(argv[2]);
+  numiters = atoi(argv[3]);
+  A =  (unsigned int) atoi(argv[1]);
+  S =  (unsigned int) atoi(argv[2]);
 
 
   /**** Fill T and R ******/
@@ -145,8 +54,8 @@ int main(int argc, char * argv[])
   FullR = (float *)calloc(S*A*S, sizeof(float));
 
   for (int tr = 0; tr<S*A*S;tr++){
-    FullT[tr] = 1;
-    FullR[tr] = 1;
+    FullT[tr] = tr/1000;
+    FullR[tr] = tr/1000;
   }
 
 
@@ -227,18 +136,16 @@ int main(int argc, char * argv[])
       }
       next_seq[s] = max_a;
     }
-		for (int s = 0; s < S; s++) {
-		      V_seq[s] = next_seq[s];
-		     }
-
-			}
-
-	    for (int s = 0; s < S; s++) {
-	      if (V_seq[s] != next[s]) {
-	      printf("GPU version failed correctness test\n");
-	      }
-	     }
-		  }
+    for (int s = 0; s < S; s++) {
+      V_seq[s] = next_seq[s];
+     }
+    }
+    for (int s = 0; s < S; s++) {
+      if (V_seq[s] != next[s]) {
+      printf("GPU version failed correctness test\n");
+      }
+     }
+  }
 
 
 __global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,int A,int S)

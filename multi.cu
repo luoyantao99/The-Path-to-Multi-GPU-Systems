@@ -52,8 +52,8 @@ int main(int argc, char * argv[])
   cudaMallocManaged(&BlockMaxArrays, S*ceil(A/threadperblock)*sizeof(float));
 
   for (int tr = 0; tr<S*A*S;tr++){
-    FullT[tr] = 1;
-    FullR[tr] = 1;
+    FullT[tr] = tr/1000;
+    FullR[tr] = tr/1000;
   }
 
   for (int j = 0; j<S;j++){
