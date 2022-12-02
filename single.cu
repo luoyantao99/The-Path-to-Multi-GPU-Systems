@@ -149,7 +149,7 @@ int main(int argc, char * argv[])
     }
   }
 
-  printf("GPU version passed correctness test");
+  printf("GPU version passed correctness test\n");
 
 }
 
