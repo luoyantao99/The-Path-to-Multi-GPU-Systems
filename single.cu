@@ -181,16 +181,16 @@ int main(int argc, char * argv[])
       }
       next_seq[s] = max_a;
     }
-		for (int s = 0; s < S; s++) {
-		      V_seq[s] = next_seq[s];
-		     }
-	}
+    for (int s = 0; s < S; s++) {
+      V_seq[s] = next_seq[s];
+    }
+  }
 
-	for (int s = 0; s < S; s++) {
-	  if (V_seq[s] != next[s]) {
-	    printf("GPU version failed correctness test\n");
-	  }
-	}
+  for (int s = 0; s < S; s++) {
+    if (V_seq[s] != next[s]) {
+      printf("GPU version failed correctness test\n");
+    }
+  }
 
   printf("GPU version passed correctness test\n");
 
