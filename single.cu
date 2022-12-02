@@ -16,34 +16,31 @@ static struct argp_option options[] = {
   { 0 }
 };
 
-struct arguments
-{
-	char* args[0];
-	int A_size, S_size, iter, p_num;
+struct arguments {
+  char* args[0];
+  int A_size, S_size, iter, p_num;
 };
 
-static error_t parse_opt (int key, char* arg, struct argp_state* state)
-{
+static error_t parse_opt (int key, char* arg, struct argp_state* state) {
   struct arguments *arguments =  static_cast<struct arguments*>(state->input);
 
-	switch (key)
-	{
-		case 'A':
-			arguments->A_size = atoi(arg);
-			break;
-		case 'S':
-			arguments->S_size = atoi(arg);
-			break;
-		case 'i':
-			arguments->iter = atoi(arg);
-			break;
+  switch (key) {
+    case 'A':
+      arguments->A_size = atoi(arg);
+      break;
+    case 'S':
+      arguments->S_size = atoi(arg);
+      break;
+    case 'i':
+      arguments->iter = atoi(arg);
+      break;
     case 'p':
-			arguments->p_num = atoi(arg);
-			break;
-		default:
-			return ARGP_ERR_UNKNOWN;
-	}
-	return 0;
+      arguments->p_num = atoi(arg);
+      break;
+    default:
+      return ARGP_ERR_UNKNOWN;
+  }
+  return 0;
 }
 
 static struct argp argp = { options, parse_opt, args_doc, doc };
@@ -58,15 +55,15 @@ int main(int argc, char * argv[])
 {
   struct arguments user_input;
 
-	/* Default values. */
-	user_input.A_size = 1024;
-	user_input.S_size = 10;
-	user_input.iter = 1;
+  /* Default values. */
+  user_input.A_size = 1024;
+  user_input.S_size = 10;
+  user_input.iter = 1;
   user_input.p_num = 1;
 
-	argp_parse (&argp, argc, argv, 0, 0, &user_input);
-	printf ("Action space size = %d\nState space size = %d\nNumber of iterations = %d\nProblem selected: %d\n",
-		user_input.A_size, user_input.S_size, user_input.iter, user_input.p_num);
+  argp_parse (&argp, argc, argv, 0, 0, &user_input);
+  printf ("Action space size = %d\nState space size = %d\nNumber of iterations = %d\nProblem selected: %d\n",
+    user_input.A_size, user_input.S_size, user_input.iter, user_input.p_num);
 
   unsigned int A =  (unsigned int) user_input.A_size;
   unsigned int S =  (unsigned int) user_input.S_size;
