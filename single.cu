@@ -12,13 +12,14 @@ static struct argp_option options[] = {
 	{0, 'A',  "A_size",  0,  "Action space size" },
 	{0, 'S',  "S_size",	 0,  "State space size" },
 	{0, 'i',  "iter",    0,  "Number of iterations" },
+  {0, 'p',  "p_num",    0,  "Choose problem number" },
 	{ 0 }
 };
 
 struct arguments
 {
 	char* args[0];
-	int A_size, S_size, iter;
+	int A_size, S_size, iter, p_num;
 };
 
 static error_t parse_opt (int key, char* arg, struct argp_state* state)
@@ -35,6 +36,9 @@ static error_t parse_opt (int key, char* arg, struct argp_state* state)
 			break;
 		case 'i':
 			arguments->iter = atoi(arg);
+			break;
+    case 'p':
+			arguments->p_num = atoi(arg);
 			break;
 		default:
 			return ARGP_ERR_UNKNOWN;
@@ -58,19 +62,16 @@ int main(int argc, char * argv[])
 	user_input.A_size = 1024;
 	user_input.S_size = 10;
 	user_input.iter = 1;
+  user_input.p_num = 1;
 
 	argp_parse (&argp, argc, argv, 0, 0, &user_input);
-	printf ("Action space size = %d\nState space size = %d\nNumber of iterations = %d\n",
-		user_input.A_size, user_input.S_size, user_input.iter);
+	printf ("Action space size = %d\nState space size = %d\nNumber of iterations = %d\nProblem selected: %d\n",
+		user_input.A_size, user_input.S_size, user_input.iter, user_input.p_num);
 
-
-  unsigned int S;
-  unsigned int A;
-  int numiters = 0;
-
-  numiters = user_input.iter;
-  A =  (unsigned int) user_input.A_size;
-  S =  (unsigned int) user_input.S_size;
+  unsigned int A =  (unsigned int) user_input.A_size;
+  unsigned int S =  (unsigned int) user_input.S_size;
+  int numiters = user_input.iter;
+  int problem = user_input.p_num;
 
   int threadperblock = 64;
   float * FullT;
@@ -194,7 +195,23 @@ int main(int argc, char * argv[])
 	  }
 	}
 
+  printf("GPU version passed correctness test\n");
 
+  cudaFree(V);
+  cudaFree(T);
+  cudaFree(R);
+  cudaFree(BlockMaxs);
+  cudaFree(StateMax);
+  free(StateMaxCPU);
+  free(FullT);
+  free(FullR);
+  free(next);
+  free(V_seq);
+  free(StateT);
+  free(StateR);
+  free(next_seq);
+
+  return 0;
 }
 
 
