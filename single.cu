@@ -212,7 +212,7 @@ int main(int argc, char * argv[])
 }
 
 
-__global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,int A,int S)
+__global__ void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,int A,int S)
 {
     // Use Shared Memory to write sums
     __shared__ float sprimeSumValues[64];
@@ -246,7 +246,7 @@ __global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,
     }
  }
 
- __global__  void SecondReduc(float * StateMax, float *BlockMaxs)
+ __global__ void SecondReduc(float * StateMax, float *BlockMaxs)
  {
      __syncthreads();
      // Use Reduction Tree to quickly find max of all blocks
@@ -262,7 +262,6 @@ __global__  void MaxSum(float *BlockMaxs,float * V, float * R,float * T,int sID,
       StateMax[0] = BlockMaxs[0];
     }
   }
-
 
 
 // compile with: nvcc -o singlegpu single.cu
