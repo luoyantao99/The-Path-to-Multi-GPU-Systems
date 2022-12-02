@@ -15,7 +15,7 @@ int main(int argc, char * argv[])
     printf("Not enough arguments");
     exit(1);
   }
-  
+
   int threadperblock = 64;
   float * FullT;
   float * FullR;
@@ -113,7 +113,7 @@ int main(int argc, char * argv[])
     cudaDeviceSynchronize();
   }
 
-  clock_t end = clock();  
+  clock_t end = clock();
   double time_taken = ((double)(end - start))/ CLOCKS_PER_SEC;
   printf("Time taken = %lf\n", time_taken);
 

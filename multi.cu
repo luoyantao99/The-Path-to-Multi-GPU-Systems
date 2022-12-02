@@ -12,7 +12,6 @@ int main(int argc, char * argv[])
   float * FullT;
   float * FullR;
   float * BlockMaxArrays;
-  float * next;
   float * V;
   int numDevs= 0;
 
@@ -31,15 +30,19 @@ int main(int argc, char * argv[])
   cudaMallocManaged(&V, S*sizeof(float));
   cudaMallocManaged(&BlockMaxArrays, S*ceil(A/threadperblock)*sizeof(float));
 
+  printf("i = \n");
+
   for (int tr = 0; tr<S*A*S;tr++){
     FullT[tr] = 1;
     FullR[tr] = 1;
   }
+  printf("i = \n");
 
   /**** Fill next ******/
   for (int j = 0; j<S;j++){
-    next[j] = 0;
+    V[j] = 0;
   }
+  printf("i = \n");
 
   // Find number of GPUs
   cudaGetDeviceCount(&numDevs);
