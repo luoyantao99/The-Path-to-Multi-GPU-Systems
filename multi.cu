@@ -2,18 +2,70 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <argp.h>
+
+static char doc[] = "Single GPU version of the MDP solver";
+static char args_doc[] = "";
+
+static struct argp_option options[] = {
+  {0, 'A',  "A_size",  0,  "Action space size" },
+  {0, 'S',  "S_size",	 0,  "State space size" },
+  {0, 'i',  "iter",    0,  "Number of iterations" },
+  {0, 'p',  "p_num",    0,  "Choose problem number" },
+  { 0 }
+};
+
+struct arguments {
+  char* args[0];
+  int A_size, S_size, iter, p_num;
+};
+
+static error_t parse_opt (int key, char* arg, struct argp_state* state) {
+  struct arguments *arguments =  static_cast<struct arguments*>(state->input);
+
+  switch (key) {
+    case 'A':
+      arguments->A_size = atoi(arg);
+      break;
+    case 'S':
+      arguments->S_size = atoi(arg);
+      break;
+    case 'i':
+      arguments->iter = atoi(arg);
+      break;
+    case 'p':
+      arguments->p_num = atoi(arg);
+      break;
+    default:
+      return ARGP_ERR_UNKNOWN;
+  }
+  return 0;
+}
+
+static struct argp argp = { options, parse_opt, args_doc, doc };
+
 
 __global__ void MaxSum(float *,float *,float *,float *,int,int,int);
 __global__ void SecondReduc(float *,float *);
 
 int main(int argc, char * argv[])
 {
+  struct arguments user_input;
 
-  if (argc != 4)
-  {
-    printf("Not enough arguments");
-    exit(1);
-  }
+  /* Default values. */
+  user_input.A_size = 1024;
+  user_input.S_size = 10;
+  user_input.iter = 1;
+  user_input.p_num = 1;
+
+  argp_parse (&argp, argc, argv, 0, 0, &user_input);
+  printf ("Action space size = %d\nState space size = %d\nNumber of iterations = %d\nProblem selected: %d\n",
+    user_input.A_size, user_input.S_size, user_input.iter, user_input.p_num);
+
+  unsigned int A =  (unsigned int) user_input.A_size;
+  unsigned int S =  (unsigned int) user_input.S_size;
+  int numiters = user_input.iter;
+  int problem = user_input.p_num;
 
   int threadperblock = 64;
   float * FullT;
@@ -22,19 +74,11 @@ int main(int argc, char * argv[])
   float * V;
   int numDevs= 0;
 
-  unsigned int S;
-  unsigned int A;
-  int numiters = 0;
-
   //Sequential stuff
   float sum_seq;
   float max_a;
   float * V_seq;
   float * next_seq;
-
-  numiters = atoi(argv[3]);
-  A =  (unsigned int) atoi(argv[1]);
-  S =  (unsigned int) atoi(argv[2]);
 
   next_seq = (float *)calloc(S, sizeof(float));
   V_seq = (float *)calloc(S, sizeof(float));
@@ -176,3 +220,7 @@ __global__  void MaxSum(float *BlockMaxArrays,float * V, float * FullR,float * F
       V[blockIdx.x] = BlockMaxArrays[blockIdx.x*blockDim.x*2];
     }
   }
+
+
+// compile with: nvcc -o multigpu multi.cu
+// ./multigpu -A 1024 -S 100 -i 50
