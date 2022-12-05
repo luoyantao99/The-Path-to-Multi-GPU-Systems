@@ -91,9 +91,25 @@ int main(int argc, char * argv[])
   /**** Fill T and R ******/
   // Allocate Unified Memory
   cudaMallocManaged(&FullT, S*A*S*sizeof(float));
+  if(!FullT) {
+	  printf("Error allocating array FullT\n");
+	  exit(1);
+	}
   cudaMallocManaged(&FullR, S*A*S*sizeof(float));
+  if(!FullR) {
+	  printf("Error allocating array FullR\n");
+	  exit(1);
+	}
   cudaMallocManaged(&V, S*sizeof(float));
+  if(!V) {
+	  printf("Error allocating array V\n");
+	  exit(1);
+	}
   cudaMallocManaged(&BlockMaxArrays, S*ceil(A/threadperblock)*sizeof(float));
+  if(!BlockMaxArrays) {
+	  printf("Error allocating array BlockMaxArrays\n");
+	  exit(1);
+	}
 
   for (int tr = 0; tr<S*A*S;tr++){
     FullT[tr] = tr/1000;
