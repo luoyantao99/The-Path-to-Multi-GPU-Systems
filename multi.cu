@@ -8,7 +8,7 @@ static char doc[] = "Multi GPU version of the MDP solver";
 static char args_doc[] = "";
 
 static struct argp_option options[] = {
-  {0, 'A',  "A_size",  0,  "Action space size" },
+  {0, 'A',  "A_size",  0,  "Action space size (minimum 128)" },
   {0, 'S',  "S_size",	 0,  "State space size" },
   {0, 'i',  "iter",    0,  "Number of iterations" },
   { 0 }
@@ -58,6 +58,10 @@ int main(int argc, char * argv[])
     user_input.A_size, user_input.S_size, user_input.iter);
 
   unsigned int A =  (unsigned int) user_input.A_size;
+  if(A < 128) {
+    printf("ERROR: Action space size needs to be at least 128\n");
+    exit(1);
+  }
   unsigned int S =  (unsigned int) user_input.S_size;
   int numiters = user_input.iter;
 
@@ -68,7 +72,7 @@ int main(int argc, char * argv[])
   float * V;
   int numDevs= 0;
 
-  //Sequential stuff
+  //for Sequential version
   float sum_seq;
   float max_a;
   float * V_seq;
@@ -80,6 +84,8 @@ int main(int argc, char * argv[])
     next_seq[j] = 0;
     V_seq[j] = 0;
   }
+
+  // start timer
   clock_t start = clock();
 
   /**** Fill T and R ******/
@@ -147,6 +153,7 @@ int main(int argc, char * argv[])
   }
 }
 
+  // end timer
   clock_t end = clock();
   double time_taken = ((double)(end - start))/ CLOCKS_PER_SEC;
   printf("Time taken = %lf\n", time_taken);
@@ -174,7 +181,7 @@ int main(int argc, char * argv[])
 
   for (int s = 0; s < S; s++) {
     if (V_seq[s] != V[s]) {
-      printf("GPU version failed correctness test\n");
+      printf("ERROR: GPU version failed correctness test\n");
       exit(1);
     }
   }
