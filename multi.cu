@@ -160,7 +160,6 @@ int main(int argc, char * argv[])
   next_seq = (float *)calloc(S, sizeof(float));
   /*** Do sequential. ***/
   for (int i = 0; i < numiters; i++) {
-    // printf("i = %u\n", i);
     for (int s = 0; s < S; s++) {
       max_a = 0;
       for (int a = 0; a < A; a++) {
@@ -176,14 +175,26 @@ int main(int argc, char * argv[])
     }
     for (int s = 0; s < S; s++) {
       V_seq[s] = next_seq[s];
-     }
     }
-    for (int s = 0; s < S; s++) {
-      if (V_seq[s] != V[s]) {
-      printf("GPU version failed correctness test\n");
-      }
-     }
   }
+
+  for (int s = 0; s < S; s++) {
+    if (V_seq[s] != V[s]) {
+      printf("GPU version failed correctness test\n");
+      exit(1);
+    }
+  }
+  printf("GPU version passed correctness test\n");
+
+  cudaFree(FullT);
+  cudaFree(FullR);
+  cudaFree(V);
+  cudaFree(BlockMaxArrays);
+  free(V_seq);
+  free(next_seq);
+
+  return 0;
+}
 
 
 __global__  void MaxSum(float *BlockMaxArrays,float * V, float * FullR,float * FullT,int sID,int A,int S)
