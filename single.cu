@@ -119,10 +119,30 @@ int main(int argc, char * argv[])
 
   /*** Allocate Required Space on GPU ***/
   cudaMalloc((void **)&V, S*sizeof(float));
+  if(!V) {
+	  printf("Error allocating array V\n");
+	  exit(1);
+	}
   cudaMalloc((void **)&T, S*A*sizeof(float));
+  if(!T) {
+	  printf("Error allocating array T\n");
+	  exit(1);
+	}
   cudaMalloc((void **)&R, S*A*sizeof(float));
+  if(!R) {
+	  printf("Error allocating array R\n");
+	  exit(1);
+	}
   cudaMalloc((void **)&BlockMaxs, ceil(A/threadperblock)*sizeof(float));
+  if(!BlockMaxs) {
+	  printf("Error allocating array BlockMaxs\n");
+	  exit(1);
+	}
   cudaMalloc((void **)&StateMax, 1*sizeof(float));
+  if(!StateMax) {
+	  printf("Error allocating array StateMax\n");
+	  exit(1);
+	}
 
   /**** Loop Through Iterations ******/
   for (int i = 0; i < numiters; i++) {
@@ -189,6 +209,7 @@ int main(int argc, char * argv[])
   for (int s = 0; s < S; s++) {
     if (V_seq[s] != next[s]) {
       printf("GPU version failed correctness test\n");
+      exit(1);
     }
   }
   
