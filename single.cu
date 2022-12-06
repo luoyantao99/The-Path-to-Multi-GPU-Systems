@@ -90,7 +90,15 @@ int main(int argc, char * argv[])
 
   /**** Fill T and R ******/
   FullT = (float *)calloc(S*A*S, sizeof(float));
+  if(!FullT) {
+	  printf("Error allocating array FullT\n");
+	  exit(1);
+	}
   FullR = (float *)calloc(S*A*S, sizeof(float));
+  if(!FullR) {
+	  printf("Error allocating array FullR\n");
+	  exit(1);
+	}
 
   for (int tr = 0; tr<S*A*S;tr++){
     FullT[tr] = 1;
@@ -100,14 +108,30 @@ int main(int argc, char * argv[])
 
   /**** Fill V and V_seq ******/
   next = (float *)calloc(S, sizeof(float));
+  if(!next) {
+	  printf("Error allocating array next\n");
+	  exit(1);
+	}
   V_seq = (float *)calloc(S, sizeof(float));
+  if(!V_seq) {
+	  printf("Error allocating array V_seq\n");
+	  exit(1);
+	}
   for (int j = 0; j<S;j++){
     next[j] = 0;
     V_seq[j] = 0;
   }
 
   StateT = (float *)calloc(S*A, sizeof(float));
+  if(!StateT) {
+	  printf("Error allocating array StateT\n");
+	  exit(1);
+	}
   StateR = (float *)calloc(S*A, sizeof(float));
+  if(!StateR) {
+	  printf("Error allocating array StateR\n");
+	  exit(1);
+	}
 
   clock_t start = clock();
 
