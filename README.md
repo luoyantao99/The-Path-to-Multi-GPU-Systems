@@ -8,5 +8,5 @@ Below we include some of the results of the experiments:
 
 ![Alt text](StateExp.png?raw=true "State")
 
-![Alt text](Action.png?raw=true "Action")
+![Alt text](ActionExp.png?raw=true "Action")
 
