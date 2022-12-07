@@ -9,8 +9,8 @@ static char args_doc[] = "";
 
 static struct argp_option options[] = {
   {0, 'A',  "A_size",  0,  "Action space size (minimum 128)" },
-  {0, 'S',  "S_size",	 0,  "State space size (even number)" },
-  {0, 'i',  "iter",    0,  "Number of iterations" },
+  {0, 'S',  "S_size",	 0,  "State space size (minimum 64, even number)" },
+  {0, 'i',  "iter",    0,  "Number of iterations (minimum 10)" },
   { 0 }
 };
 
@@ -63,7 +63,19 @@ int main(int argc, char * argv[])
     exit(1);
   }
   unsigned int S =  (unsigned int) user_input.S_size;
+  if(S < 64) {
+    printf("ERROR: State space size needs to be at least 64\n");
+    exit(1);
+  }
+  if(S % 2 != 0) {
+    printf("ERROR: State space size needs to be an even number\n");
+    exit(1);
+  }
   int numiters = user_input.iter;
+  if(numiters < 10) {
+    printf("ERROR: The number of iterations needs to be at least 10\n");
+    exit(1);
+  }
 
   int threadperblock = 64;
   float * FullT;
