@@ -9,7 +9,7 @@ static char args_doc[] = "";
 
 static struct argp_option options[] = {
   {0, 'A',  "A_size",  0,  "Action space size (minimum 128)" },
-  {0, 'S',  "S_size",	 0,  "State space size" },
+  {0, 'S',  "S_size",	 0,  "State space size (even number)" },
   {0, 'i',  "iter",    0,  "Number of iterations" },
   { 0 }
 };
